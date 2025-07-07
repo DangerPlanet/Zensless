@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Wisdom</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; }
+        * { box-sizing: border-box; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const ZenWisdomApp = () => {
+            const [currentScreen, setCurrentScreen] = useState('start');
+            const [zenData, setZenData] = useState(null);
+            const [explanation, setExplanation] = useState('');
+            const [showExplanation, setShowExplanation] = useState(false);
+            const [loading, setLoading] = useState(false);
+            const [bgColor, setBgColor] = useState('bg-pink-100');
+            const [showLinkModal, setShowLinkModal] = useState(false);
+
+            const pastelColors = [
+                'bg-pink-100', 'bg-purple-100', 'bg-blue-100', 'bg-green-100',
+                'bg-yellow-100', 'bg-indigo-100', 'bg-teal-100', 'bg-orange-100'
+            ];
+
+            const zenCharacters = ['🧘‍♂️', '🙏', '☯️', '🏔️', '🍃', '🌸', '🕯️', '🎋', '🌊', '🌅'];
+
+            // Auto-fullscreen on load
+            useEffect(() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('fullscreen') === 'true') {
+                    setTimeout(() => {
+                        if (document.documentElement.requestFullscreen) {
+                            document.documentElement.requestFullscreen().catch(err => {
+                                console.log('Fullscreen request failed:', err);
+                            });
+                        }
+                    }, 1000);
+                }
+            }, []);
+
+            const generateShareableLink = () => {
+                const currentUrl = window.location.href.split('?')[0];
+                return `${currentUrl}?fullscreen=true`;
+            };
+
+            // Replace with your actual API endpoint
+            const generateZenWisdom = async () => {
+                setLoading(true);
+                setShowExplanation(false);
+                
+                try {
+                    // For demo purposes - replace with actual API call
+                    const demoWisdom = [
+                        "The empty teacup holds infinite possibilities.",
+                        "Confused algorithms dream of electric sheep.",
+                        "The backwards clock finds time in reverse.",
+                        "Silent keyboards speak the loudest truths.",
+                        "The digital lotus blooms in pixelated gardens.",
+                        "Lost passwords find themselves in forgotten dreams.",
+                        "The spinning wheel of loading reveals eternal patience.",
+                        "Binary meditation: zeros and ones become nothing and everything."
+                    ];
+                    
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+                    
+                    const randomPhrase = demoWisdom[Math.floor(Math.random() * demoWisdom.length)];
+                    const randomCharacter = zenCharacters[Math.floor(Math.random() * zenCharacters.length)];
+                    const randomColor = pastelColors[Math.floor(Math.random() * pastelColors.length)];
+                    
+                    setZenData({
+                        phrase: randomPhrase,
+                        character: randomCharacter
+                    });
+                    setBgColor(randomColor);
+                    setCurrentScreen('wisdom');
+                    
+                } catch (error) {
+                    console.error('Error generating zen wisdom:', error);
+                    setZenData({
+                        phrase: "The confused algorithm seeks wisdom in the void.",
+                        character: '🧘‍♂️'
+                    });
+                    setBgColor('bg-purple-100');
+                    setCurrentScreen('wisdom');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const generateExplanation = async () => {
+                if (!zenData) return;
+                
+                setLoading(true);
+                
+                try {
+                    // Demo explanations - replace with actual API call
+                    const demoExplanations = [
+                        "Ancient masters teach us that in the realm of digital consciousness, emptiness contains all possibilities.",
+                        "The wise sage knows that confusion is merely clarity wearing a disguise of uncertainty.",
+                        "In the sacred texts of the silicon monks, time moves in all directions simultaneously.",
+                        "The enlightened keyboard understands that silence between keystrokes holds the deepest wisdom.",
+                        "Master Pixel once said: 'In the garden of screens, only the brightest flowers bloom in darkness.'"
+                    ];
+                    
+                    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate API delay
+                    
+                    const randomExplanation = demoExplanations[Math.floor(Math.random() * demoExplanations.length)];
+                    setExplanation(randomExplanation);
+                    setShowExplanation(true);
+                    
+                } catch (error) {
+                    console.error('Error generating explanation:', error);
+                    setExplanation("Ancient masters teach us that when words fail, the server's wisdom transcends understanding.");
+                    setShowExplanation(true);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const startOver = () => {
+                setCurrentScreen('start');
+                setZenData(null);
+                setExplanation('');
+                setShowExplanation(false);
+                setBgColor('bg-pink-100');
+            };
+
+            const copyLink = async () => {
+                const link = generateShareableLink();
+                try {
+                    await navigator.clipboard.writeText(link);
+                    alert('Link copied! Send this to open the app in fullscreen.');
+                } catch (err) {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = link;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Link copied! Send this to open the app in fullscreen.');
+                }
+            };
+
+            const ShareModal = () => (
+                React.createElement('div', {
+                    className: "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+                }, 
+                    React.createElement('div', {
+                        className: "bg-white rounded-3xl p-6 max-w-sm w-full"
+                    },
+                        React.createElement('h3', {
+                            className: "text-xl font-semibold mb-4 text-center"
+                        }, "Share Zen Wisdom"),
+                        React.createElement('p', {
+                            className: "text-gray-600 mb-6 text-center text-sm"
+                        }, "Copy this link to share the app. It will open in fullscreen mode!"),
+                        React.createElement('div', {
+                            className: "space-y-4"
+                        },
+                            React.createElement('button', {
+                                onClick: copyLink,
+                                className: "w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-6 rounded-full transition-colors duration-300"
+                            }, "Copy Link"),
+                            React.createElement('button', {
+                                onClick: () => setShowLinkModal(false),
+                                className: "w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-6 rounded-full transition-colors duration-300"
+                            }, "Close")
+                        )
+                    )
+                )
+            );
+
+            if (currentScreen === 'start') {
+                return React.createElement('div', {
+                    className: `min-h-screen ${bgColor} flex flex-col transition-all duration-500`
+                },
+                    React.createElement('div', {
+                        className: "flex justify-between items-center p-4"
+                    },
+                        React.createElement('div', { className: "w-6" }),
+                        React.createElement('h1', {
+                            className: "text-lg font-light text-gray-700"
+                        }, "Zen Wisdom"),
+                        React.createElement('button', {
+                            onClick: () => setShowLinkModal(true),
+                            className: "text-gray-500 hover:text-gray-700 transition-colors"
+                        },
+                            React.createElement('svg', {
+                                className: "w-6 h-6",
+                                fill: "none",
+                                stroke: "currentColor",
+                                viewBox: "0 0 24 24"
+                            },
+                                React.createElement('path', {
+                                    strokeLinecap: "round",
+                                    strokeLinejoin: "round",
+                                    strokeWidth: 2,
+                                    d: "M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                                })
+                            )
+                        )
+                    ),
+                    React.createElement('div', {
+                        className: "flex-1 flex items-center justify-center px-8"
+                    },
+                        React.createElement('div', {
+                            className: "text-center"
+                        },
+                            React.createElement('div', {
+                                className: "mb-8"
+                            },
+                                React.createElement('div', {
+                                    className: "text-6xl mb-4"
+                                }, "🧘‍♂️"),
+                                React.createElement('p', {
+                                    className: "text-gray-600 text-lg font-light"
+                                }, "Seek meaningless wisdom")
+                            ),
+                            React.createElement('button', {
+                                onClick: generateZenWisdom,
+                                disabled: loading,
+                                className: "bg-white hover:bg-gray-50 text-gray-800 font-bold py-6 px-12 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-4xl border-2 border-gray-200 disabled:opacity-50"
+                            }, loading ? '...' : '42')
+                        )
+                    ),
+                    showLinkModal && React.createElement(ShareModal)
+                );
+            }
+
+            return React.createElement('div', {
+                className: `min-h-screen ${bgColor} flex flex-col transition-all duration-500`
+            },
+                React.createElement('div', {
+                    className: "flex justify-between items-center p-4"
+                },
+                    React.createElement('button', {
+                        onClick: startOver,
+                        className: "text-gray-500 hover:text-gray-700 transition-colors"
+                    },
+                        React.createElement('svg', {
+                            className: "w-6 h-6",
+                            fill: "none",
+                            stroke: "currentColor",
+                            viewBox: "0 0 24 24"
+                        },
+                            React.createElement('path', {
+                                strokeLinecap: "round",
+                                strokeLinejoin: "round",
+                                strokeWidth: 2,
+                                d: "M10 19l-7-7m0 0l7-7m-7 7h18"
+                            })
+                        )
+                    ),
+                    React.createElement('h1', {
+                        className: "text-lg font-light text-gray-700"
+                    }, "Zen Wisdom"),
+                    React.createElement('button', {
+                        onClick: () => setShowLinkModal(true),
+                        className: "text-gray-500 hover:text-gray-700 transition-colors"
+                    },
+                        React.createElement('svg', {
+                            className: "w-6 h-6",
+                            fill: "none",
+                            stroke: "currentColor",
+                            viewBox: "0 0 24 24"
+                        },
+                            React.createElement('path', {
+                                strokeLinecap: "round",
+                                strokeLinejoin: "round",
+                                strokeWidth: 2,
+                                d: "M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z"
+                            })
+                        )
+                    )
+                ),
+                React.createElement('div', {
+                    className: "flex-1 flex flex-col justify-center px-6 pb-8"
+                },
+                    React.createElement('div', {
+                        className: "text-center mb-8"
+                    },
+                        React.createElement('div', {
+                            className: "text-7xl mb-6 animate-pulse"
+                        }, zenData?.character)
+                    ),
+                    React.createElement('div', {
+                        className: "mb-8"
+                    },
+                        React.createElement('div', {
+                            className: "bg-white bg-opacity-80 backdrop-blur-sm rounded-3xl p-6 shadow-lg mx-2"
+                        },
+                            React.createElement('p', {
+                                className: "text-xl font-light text-gray-700 leading-relaxed italic text-center"
+                            }, `"${zenData?.phrase}"`)
+                        )
+                    ),
+                    showExplanation && React.createElement('div', {
+                        className: "mb-8"
+                    },
+                        React.createElement('div', {
+                            className: "bg-white bg-opacity-60 backdrop-blur-sm rounded-2xl p-5 shadow-md mx-2"
+                        },
+                            React.createElement('p', {
+                                className: "text-base text-gray-600 leading-relaxed text-center"
+                            }, explanation)
+                        )
+                    ),
+                    React.createElement('div', {
+                        className: "space-y-4 px-4"
+                    },
+                        React.createElement('button', {
+                            onClick: generateZenWisdom,
+                            disabled: loading,
+                            className: "w-full bg-white hover:bg-gray-50 text-gray-700 font-medium py-4 px-8 rounded-full shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 text-lg"
+                        }, loading ? '...' : 'lighten me'),
+                        React.createElement('button', {
+                            onClick: generateExplanation,
+                            disabled: loading,
+                            className: "w-full bg-white hover:bg-gray-50 text-gray-700 font-medium py-4 px-8 rounded-full shadow-md hover:shadow-lg transition-all duration-300 disabled:opacity-50 text-lg"
+                        }, loading ? '...' : 'explain')
+                    )
+                ),
+                showLinkModal && React.createElement(ShareModal)
+            );
+        };
+
+        ReactDOM.render(React.createElement(ZenWisdomApp), document.getElementById('root'));
+    </script>
+</body>
+</html>
